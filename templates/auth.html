@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Glint — {% if mode == 'login' %}Sign in{% else %}Create account{% endif %}</title>
+  <title>Cardifol — {% if mode == 'login' %}Sign in{% else %}Create account{% endif %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -48,7 +48,7 @@
       {% if mode == 'login' %}Welcome back{% else %}Create your account{% endif %}
     </h2>
     <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:24px">
-      {% if mode == 'login' %}Sign in to your Glint dashboard.{% else %}Start collecting reviews in minutes.{% endif %}
+      {% if mode == 'login' %}Sign in to your Cardifol dashboard.{% else %}Start collecting reviews in minutes.{% endif %}
     </p>
 
     {% if error %}
