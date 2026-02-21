@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Cardifol — {{ biz.name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--a:{{ biz.accent_color }}}
+    *{-webkit-font-smoothing:antialiased;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#0d0d0d;color:#e8e8ec;min-height:100vh}
+    .wm{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.02em}.wm span{color:var(--a)}
+    .sl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:600;margin-bottom:12px}
+    .sbl{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;font-weight:500;text-decoration:none;color:rgba(255,255,255,.5);transition:all .18s}
+    .sbl:hover,.sbl.on{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+    .card{background:#1c1c1f;border:1px solid rgba(255,255,255,.07);border-radius:20px}
+    .ca{background:linear-gradient(135deg,var(--a),color-mix(in srgb,var(--a) 55%,#000));border-radius:20px}
+    .mn{font-family:'DM Serif Display',serif;font-size:40px;line-height:1;letter-spacing:-.03em}
+    .pb{flex:1;border-radius:5px 5px 0 0;background:rgba(255,255,255,.08);position:relative;cursor:default;transition:background .2s;min-height:2px}
+    .pb.pk{background:var(--a)}.pb:hover{background:rgba(255,255,255,.18)}.pb.pk:hover{filter:brightness(1.2)}
+    .pb .tp{position:absolute;bottom:calc(100%+5px);left:50%;transform:translateX(-50%);background:#222;color:#fff;font-size:11px;border-radius:6px;padding:3px 7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;border:1px solid rgba(255,255,255,.1)}
+    .pb:hover .tp{opacity:1}
+    .pt{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+    .pf{height:100%;border-radius:99px}
+    .cg{background:linear-gradient(90deg,#4285F4,#34A853)}.ct{background:linear-gradient(90deg,#00b67a,#00a36e)}.cta{background:linear-gradient(90deg,#34e0a1,#00b591)}.cd{background:linear-gradient(90deg,#888,#555)}
+    .badge{background:var(--a);color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px}
+    .qrw{background:#f9fafb;border-radius:14px;padding:14px;display:inline-block}
+    .qrw img{width:128px;height:128px;display:block}
+    .fbi{border-bottom:1px solid rgba(255,255,255,.05)}.fbi:last-of-type{border-bottom:none}
+    .cpb{padding:10px 18px;background:var(--a);color:#fff;font-weight:600;font-size:13px;border:none;border-radius:11px;cursor:pointer;transition:filter .2s;white-space:nowrap}
+    .cpb:hover{filter:brightness(1.15)}
+    .hb{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.08);transition:background .18s}
+    .hb:hover{background:rgba(255,255,255,.12)}
+    .rb{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(239,68,68,.3);color:#ef4444;background:rgba(239,68,68,.07);cursor:pointer;transition:all .18s}
+    .rb:hover{background:rgba(239,68,68,.15);border-color:#ef4444}
+    .ec{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;transition:border-color .18s,background .18s}
+    .ec:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06)}
+    .av{width:38px;height:38px;border-radius:99px;object-fit:cover;flex-shrink:0}
+    .avi{width:38px;height:38px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fadeUp .42s cubic-bezier(.22,1,.36,1) both}
+    .fu1{animation-delay:.04s}.fu2{animation-delay:.09s}.fu3{animation-delay:.14s}.fu4{animation-delay:.19s}.fu5{animation-delay:.24s}.fu6{animation-delay:.3s}
+    .mb{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .mb.open{opacity:1;pointer-events:all}
+    .mbx{background:#1c1c1f;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:380px;width:90%;text-align:center;transform:scale(.95);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+    .mb.open .mbx{transform:scale(1)}
+  </style>
+</head>
+<body>
+<div class="flex min-h-screen">
+  <aside class="hidden lg:flex" style="width:220px;min-height:100vh;background:#18181b;border-right:1px solid rgba(255,255,255,.06);padding:20px 12px;flex-direction:column;flex-shrink:0">
+    <div class="wm px-2 mb-8">Cardifol<span>.</span></div>
+    <p style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);font-weight:600;padding:0 10px;margin-bottom:6px">Navigate</p>
+    <a href="/dashboard" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>All businesses</a>
+    <a href="/admin/{{ biz.slug }}" class="sbl on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Dashboard</a>
+    <a href="/admin/{{ biz.slug }}/cards" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards</a>
+    <a href="/settings/{{ biz.slug }}" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    <a href="/s/{{ biz.slug }}" target="_blank" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Review page</a>
+    <div style="margin-top:auto">
+      <p style="font-size:11px;color:rgba(255,255,255,.22);padding:0 10px;word-break:break-all;margin-bottom:4px">{{ user.email }}</p>
+      <a href="/logout" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</a>
+    </div>
+  </aside>
+
+  <main style="flex:1;overflow-x:hidden">
+    <div style="max-width:820px;margin:0 auto;padding:32px 20px 80px">
+
+      <!-- Header -->
+      <div class="fu fu1" style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap">
+        <div>
+          <p style="font-size:12px;color:rgba(255,255,255,.3);margin-bottom:4px">{{ now_date }}</p>
+          <h1 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em">{{ biz.name }}</h1>
+          <p style="font-size:13px;color:rgba(255,255,255,.3)">/s/{{ biz.slug }}</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          {% if unread_feedback > 0 %}<span class="badge">{{ unread_feedback }} new</span>{% endif %}
+          <a href="/admin/{{ biz.slug }}/cards" class="hb"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards</a>
+          <a href="/settings/{{ biz.slug }}" class="hb"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+          <button onclick="document.getElementById('dm').classList.add('open')" class="rb"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Delete</button>
+        </div>
+      </div>
+
+      <!-- 4 Metrics -->
+      <div class="fu fu2" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="ca" style="padding:18px 20px">
+          <p style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:8px">QR Scans</p>
+          <p class="mn">{{ biz.scan_count }}</p>
+          <p style="font-size:12px;opacity:.5;margin-top:4px">{{ scans_today }} today</p>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <p style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px">Clicks</p>
+          <p class="mn" style="color:var(--a)">{{ total_clicks }}</p>
+          {% if biz.scan_count > 0 %}<p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px">{{ ((total_clicks/biz.scan_count)*100)|round(0)|int }}% conv.</p>{% else %}<p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:4px">—</p>{% endif %}
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <p style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px">Card Views</p>
+          <p class="mn" style="color:#a78bfa">{{ total_card_views }}</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px">{{ cards|length }} card{{ 's' if cards|length!=1 }}</p>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <p style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px">vCard DL</p>
+          <p class="mn" style="color:#34d399">{{ total_vcard_dl }}</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px">contacts saved</p>
+        </div>
+      </div>
+
+      <!-- Pulse -->
+      <div class="card fu fu3" style="padding:20px;margin-bottom:10px">
+        <p class="sl">Hourly pulse — scans today</p>
+        <div id="pulse" style="display:flex;align-items:flex-end;gap:3px;height:68px;padding-bottom:4px"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="font-size:10px;color:rgba(255,255,255,.2)">12 AM</span><span style="font-size:10px;color:rgba(255,255,255,.2)">12 PM</span><span style="font-size:10px;color:rgba(255,255,255,.2)">11 PM</span>
+        </div>
+      </div>
+
+      <!-- Platforms + Top Cards -->
+      <div class="fu fu4" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="card" style="padding:20px">
+          <p class="sl">Review platforms</p>
+          {% for link in links %}{% set pct = ((link.clicks/(total_clicks if total_clicks>0 else 1))*100)|round(1) %}
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="width:7px;height:7px;border-radius:50%;background:{% if link.icon=='google' %}#4285F4{% elif link.icon=='trustpilot' %}#00b67a{% elif link.icon=='tripadvisor' %}#34e0a1{% else %}#888{% endif %}"></div>
+                <span style="font-size:14px;font-weight:500">{{ link.platform_name }}</span>
+              </div>
+              <span style="font-size:14px;font-weight:700">{{ link.clicks }}</span>
+            </div>
+            <div class="pt"><div class="pf {{ 'cg' if link.icon=='google' else ('ct' if link.icon=='trustpilot' else ('cta' if link.icon=='tripadvisor' else 'cd')) }}" style="width:{{ pct }}%"></div></div>
+          </div>
+          {% endfor %}
+          {% if not links %}<p style="font-size:13px;color:rgba(255,255,255,.3);text-align:center;padding:16px 0">No platforms. <a href="/settings/{{ biz.slug }}" style="color:var(--a)">Add →</a></p>{% endif %}
+        </div>
+
+        <div class="card" style="padding:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <p class="sl" style="margin-bottom:0">Top cards</p>
+            <a href="/admin/{{ biz.slug }}/cards" style="font-size:12px;color:var(--a);text-decoration:none;font-weight:600">All →</a>
+          </div>
+          {% if top_cards %}{% for card in top_cards %}
+          <a href="/admin/{{ biz.slug }}/cards/{{ card.id }}/edit" class="ec" style="margin-bottom:8px">
+            {% if card.photo_path %}<img src="{{ card.photo_path }}" class="av" alt="">
+            {% else %}<div class="avi" style="background:{{ card.accent_color or biz.accent_color }}">{{ card.full_name[0]|upper }}</div>{% endif %}
+            <div style="flex:1;min-width:0">
+              <p style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ card.full_name }}</p>
+              <p style="font-size:12px;color:rgba(255,255,255,.35)">{{ card.title or '—' }}</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <p style="font-size:15px;font-weight:700;color:var(--a)">{{ card.views }}</p>
+              <p style="font-size:10px;color:rgba(255,255,255,.25)">views</p>
+            </div>
+          </a>
+          {% endfor %}{% else %}
+          <div style="text-align:center;padding:20px 0">
+            <p style="font-size:28px;margin-bottom:8px">🪪</p>
+            <p style="font-size:13px;color:rgba(255,255,255,.3);margin-bottom:10px">No cards yet</p>
+            <a href="/admin/{{ biz.slug }}/cards/new" style="font-size:13px;color:var(--a);font-weight:600;text-decoration:none">+ Create first card</a>
+          </div>{% endif %}
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="card fu fu5" style="padding:20px;margin-bottom:10px">
+        <p class="sl">QR code — review landing</p>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div class="qrw" style="flex-shrink:0">{% if qr_b64 %}<img src="data:image/svg+xml;base64,{{ qr_b64 }}" alt="QR">{% else %}<div style="width:128px;height:128px;background:#f0f0f0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;text-align:center;padding:8px">pip install segno</div>{% endif %}</div>
+          <div style="flex:1;min-width:200px">
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,.4);word-break:break-all;margin-bottom:10px;font-family:monospace">{{ landing_url }}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="cpb" onclick="navigator.clipboard.writeText('{{ landing_url }}').then(()=>{this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy link',2000)})">Copy link</button>
+              <a href="/s/{{ biz.slug }}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);border-radius:11px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.08)">Preview ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="card fu fu6" style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <p class="sl" style="margin-bottom:0">Private feedback inbox</p>
+            {% if unread_feedback > 0 %}<span class="badge">{{ unread_feedback }} unread</span>{% endif %}
+          </div>
+          <p style="font-size:12px;color:rgba(255,255,255,.25)">{{ feedback|length }} total</p>
+        </div>
+        {% if feedback %}{% for item in feedback %}
+        <div class="fbi" style="padding:13px 0;display:flex;gap:12px;align-items:flex-start">
+          <div style="width:7px;height:7px;border-radius:50%;margin-top:7px;flex-shrink:0;background:{% if not item.is_read %}var(--a){% else %}rgba(255,255,255,.1){% endif %}"></div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:15px;line-height:1.6;{% if not item.is_read %}color:#e8e8ec;font-weight:500{% else %}color:rgba(255,255,255,.4){% endif %}">"{{ item.message }}"</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+              <span style="font-size:12px;color:rgba(255,255,255,.25)">{{ item.submitted_at.strftime('%b %d · %H:%M') }}</span>
+              {% if not item.is_read %}
+              <form method="POST" action="/admin/{{ biz.slug }}/feedback/{{ item.id }}/read" style="margin:0">
+                <button type="submit" style="font-size:12px;color:var(--a);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:3px 10px;cursor:pointer">✓ Mark read</button>
+              </form>{% else %}<span style="font-size:12px;color:rgba(255,255,255,.2);background:rgba(255,255,255,.04);border-radius:6px;padding:3px 10px">Read</span>{% endif %}
+            </div>
+          </div>
+        </div>{% endfor %}{% else %}
+        <div style="text-align:center;padding:36px 0">
+          <div style="font-size:32px;margin-bottom:8px">📭</div>
+          <p style="font-size:14px;color:rgba(255,255,255,.3)">No feedback yet</p>
+        </div>{% endif %}
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Delete modal -->
+<div class="mb" id="dm" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mbx">
+    <div style="font-size:36px;margin-bottom:14px">⚠️</div>
+    <h3 style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px">Delete "{{ biz.name }}"?</h3>
+    <p style="font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:24px">This permanently deletes the business, all review links, cards, scan history, and feedback. Cannot be undone.</p>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('dm').classList.remove('open')" style="flex:1;padding:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:rgba(255,255,255,.7);font-size:14px;font-weight:600;cursor:pointer">Cancel</button>
+      <form method="POST" action="/admin/{{ biz.slug }}/delete" style="flex:1;margin:0">
+        <button type="submit" style="width:100%;padding:12px;background:#ef4444;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Yes, delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const d=[{{ pulse_data|safe }}],max=Math.max(...d,1),pk=Math.max(...d),c=document.getElementById('pulse');
+  const L=['12a','1a','2a','3a','4a','5a','6a','7a','8a','9a','10a','11a','12p','1p','2p','3p','4p','5p','6p','7p','8p','9p','10p','11p'];
+  d.forEach((v,i)=>{const b=document.createElement('div');b.className='pb'+(v===pk&&v>0?' pk':'');b.style.height=(v/max*100)+'%';b.style.minHeight=v>0?'4px':'2px';const t=document.createElement('div');t.className='tp';t.textContent=L[i]+' · '+v;b.appendChild(t);c.appendChild(b);});
+})();
+</script>
+</body>
+</html>

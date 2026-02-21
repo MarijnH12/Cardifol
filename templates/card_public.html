@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>{{ card.full_name }} — {{ biz.name }}</title>
+  <meta name="description" content="{{ card.title or '' }}{% if card.bio %} · {{ card.bio[:100] }}{% endif %}">
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ card.full_name }}">
+  <meta property="og:description" content="{{ card.title or biz.name }}">
+  {% if card.photo_path %}<meta property="og:image" content="{{ card.photo_path }}">{% endif %}
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --a: {{ color }}; --a15: color-mix(in srgb,var(--a) 15%,transparent); --a30: color-mix(in srgb,var(--a) 30%,transparent); }
+    * { -webkit-font-smoothing: antialiased; box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #e8e8ec; }
+
+    /* Ambient glow behind hero */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, var(--a30), transparent);
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 420px; margin: 0 auto; padding: 0 20px 60px; }
+
+    /* ── Hero ── */
+    .hero { padding: 56px 0 32px; text-align: center; }
+    .avatar-ring {
+      width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 20px;
+      border: 3px solid var(--a); padding: 3px;
+      background: linear-gradient(#0a0a0f, #0a0a0f) padding-box, linear-gradient(135deg, var(--a), transparent) border-box;
+    }
+    .avatar-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+    .avatar-init {
+      width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 38px; color: #fff;
+      background: linear-gradient(135deg, var(--a), color-mix(in srgb, var(--a) 60%, #000));
+    }
+    .hero-name { font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em; margin-bottom: 6px; }
+    .hero-title { font-size: 15px; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+    .hero-company {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09);
+      border-radius: 99px; padding: 5px 14px; font-size: 13px; color: rgba(255,255,255,.55);
+    }
+    {% if biz.logo_url %}.hero-company img { width: 16px; height: 16px; border-radius: 4px; object-fit: cover; }{% endif %}
+    .hero-bio { font-size: 14px; color: rgba(255,255,255,.45); line-height: 1.65; margin-top: 14px; }
+
+    /* ── CTA Buttons ── */
+    .cta-group { display: flex; flex-direction: column; gap: 10px; margin: 28px 0; }
+    .cta-btn {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; border-radius: 18px; text-decoration: none;
+      font-size: 16px; font-weight: 600; color: #fff;
+      transition: transform .15s, filter .2s, box-shadow .2s;
+      cursor: pointer; border: none; width: 100%; text-align: left;
+    }
+    .cta-btn:active { transform: scale(.97); }
+    .cta-primary {
+      background: var(--a);
+      box-shadow: 0 4px 24px var(--a30);
+    }
+    .cta-primary:hover { filter: brightness(1.1); box-shadow: 0 6px 32px var(--a30); }
+    .cta-secondary {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .cta-secondary:hover { background: rgba(255,255,255,.12); }
+    .cta-icon {
+      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+      background: rgba(255,255,255,.15);
+    }
+    .cta-primary .cta-icon { background: rgba(255,255,255,.2); }
+    .cta-text { flex: 1; }
+    .cta-label { font-size: 16px; font-weight: 600; }
+    .cta-sub { font-size: 12px; opacity: .6; margin-top: 1px; }
+    .cta-arrow { opacity: .5; flex-shrink: 0; }
+
+    /* vCard special */
+    .cta-vcard {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--a) 80%, #000), var(--a));
+      border: 1px solid var(--a);
+      box-shadow: 0 2px 16px var(--a15);
+    }
+    .cta-vcard:hover { filter: brightness(1.08); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin: 8px 0 20px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+    .divider span { font-size: 12px; color: rgba(255,255,255,.2); white-space: nowrap; }
+
+    /* ── Social pills ── */
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 99px; padding: 8px 16px; text-decoration: none; color: rgba(255,255,255,.7);
+      font-size: 13px; font-weight: 500; transition: background .18s, border-color .18s, color .18s;
+    }
+    .pill:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.25); color: #fff; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 40px; }
+    .powered {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: rgba(255,255,255,.18); text-decoration: none;
+      border: 1px solid rgba(255,255,255,.07); border-radius: 99px; padding: 6px 14px;
+      transition: color .2s, border-color .2s;
+    }
+    .powered:hover { color: rgba(255,255,255,.45); border-color: rgba(255,255,255,.15); }
+    .powered-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--a); }
+
+    /* Animations */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .fu { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
+    .fu1 { animation-delay: .05s; } .fu2 { animation-delay: .12s; }
+    .fu3 { animation-delay: .19s; } .fu4 { animation-delay: .26s; }
+    .fu5 { animation-delay: .33s; } .fu6 { animation-delay: .4s; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1c1c1f; border: 1px solid rgba(255,255,255,.12); border-radius: 14px;
+      padding: 13px 24px; font-size: 14px; font-weight: 600; color: #fff;
+      box-shadow: 0 8px 40px rgba(0,0,0,.5); z-index: 999;
+      transition: transform .35s cubic-bezier(.22,1,.36,1), opacity .35s;
+      white-space: nowrap; pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero fu fu1">
+    <div class="avatar-ring">
+      {% if card.photo_path %}
+        <img src="{{ card.photo_path }}" alt="{{ card.full_name }}">
+      {% else %}
+        <div class="avatar-init">{{ card.full_name[0]|upper }}</div>
+      {% endif %}
+    </div>
+    <h1 class="hero-name">{{ card.full_name }}</h1>
+    {% if card.title %}<p class="hero-title">{{ card.title }}</p>{% endif %}
+    <div class="hero-company">
+      {% if biz.logo_url %}<img src="{{ biz.logo_url }}" alt="{{ biz.name }}">{% endif %}
+      {{ biz.name }}
+    </div>
+    {% if card.bio %}<p class="hero-bio">{{ card.bio }}</p>{% endif %}
+  </div>
+
+  <!-- CTA Buttons -->
+  <div class="cta-group fu fu2">
+
+    {% if card.phone %}
+    <a href="/c/{{ biz.slug }}/{{ card.slug }}/track/phone" class="cta-btn cta-primary">
+      <div class="cta-icon">📞</div>
+      <div class="cta-text">
+        <div class="cta-label">Call</div>
+        <div class="cta-sub">{{ card.phone }}</div>
+      </div>
+      <svg class="cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+
+    <a href="/c/{{ biz.slug }}/{{ card.slug }}/track/whatsapp" class="cta-btn cta-secondary">
+      <div class="cta-icon" style="background:rgba(37,211,102,.15);font-size:22px">💬</div>
+      <div class="cta-text">
+        <div class="cta-label">WhatsApp</div>
+        <div class="cta-sub">{{ card.phone }}</div>
+      </div>
+      <svg class="cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    {% endif %}
+
+    {% if card.email %}
+    <a href="/c/{{ biz.slug }}/{{ card.slug }}/track/email" class="cta-btn cta-secondary">
+      <div class="cta-icon">✉️</div>
+      <div class="cta-text">
+        <div class="cta-label">Email</div>
+        <div class="cta-sub">{{ card.email }}</div>
+      </div>
+      <svg class="cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    {% endif %}
+
+    {% if card.vcard_enabled %}
+    <a href="/c/{{ biz.slug }}/{{ card.slug }}/track/vcard" class="cta-btn cta-vcard fu fu3">
+      <div class="cta-icon" style="background:rgba(255,255,255,.2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1.5"/><line x1="11" y1="15" x2="18" y2="15"/></svg>
+      </div>
+      <div class="cta-text">
+        <div class="cta-label">Save contact</div>
+        <div class="cta-sub">Download vCard to your phone</div>
+      </div>
+      <svg class="cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </a>
+    {% endif %}
+
+  </div>
+
+  <!-- Social links -->
+  {% if card_links %}
+  <div class="fu fu4">
+    <div class="divider"><span>Connect</span></div>
+    <div class="pills">
+      {% for cl in card_links %}
+      <a href="/cl/{{ cl.id }}" class="pill" target="_blank" rel="noopener">
+        {% if cl.icon == 'linkedin' %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        {% elif cl.icon == 'instagram' %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        {% elif cl.icon == 'twitter' %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        {% elif cl.icon == 'website' %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        {% else %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        {% endif %}
+        {{ cl.label }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="footer fu fu5">
+    <a href="/dashboard" class="powered">
+      <div class="powered-dot"></div>
+      Powered by Cardifol
+    </a>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  // Show toast on vcard download
+  {% if card.vcard_enabled %}
+  document.querySelector('.cta-vcard')?.addEventListener('click', () => {
+    setTimeout(() => showToast('✓ Contact saved to your phone'), 600);
+  });
+  {% endif %}
+</script>
+</body>
+</html>

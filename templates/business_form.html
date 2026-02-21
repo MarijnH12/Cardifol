@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Glint — {% if mode == 'edit' %}Settings: {{ biz.name }}{% else %}New Business{% endif %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{-webkit-font-smoothing:antialiased;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#0d0d0d;color:#e8e8ec;min-height:100vh}
+    .topbar{background:#18181b;border-bottom:1px solid rgba(255,255,255,0.06);padding:0 28px;height:60px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+    .glint{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-0.02em}
+    .glint span{color:#6366f1}
+    .back-link{font-size:13px;color:rgba(255,255,255,0.4);text-decoration:none;display:flex;align-items:center;gap:6px}
+    .back-link:hover{color:rgba(255,255,255,0.8)}
+
+    .page{max-width:680px;margin:0 auto;padding:40px 24px 80px}
+    .section{background:#18181b;border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px;margin-bottom:16px}
+    .section-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);font-weight:600;margin-bottom:20px}
+
+    label{display:block;font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-weight:500}
+    input[type=text],input[type=url],input[type=email],textarea{
+      width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+      border-radius:12px;color:#fff;padding:11px 14px;font-size:15px;font-family:'DM Sans',sans-serif;
+      outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+    input:focus,textarea:focus{border-color:var(--accent,#6366f1);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#6366f1) 20%,transparent)}
+    textarea{resize:vertical;min-height:80px}
+    .field{margin-bottom:18px}
+    .hint{font-size:12px;color:rgba(255,255,255,0.25);margin-top:5px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:520px){.row{grid-template-columns:1fr}}
+
+    .submit-btn{background:var(--accent,#6366f1);color:#fff;font-weight:600;font-size:15px;
+                padding:13px 28px;border:none;border-radius:13px;cursor:pointer;transition:filter 0.2s,transform 0.15s}
+    .submit-btn:hover{filter:brightness(1.12)}
+    .submit-btn:active{transform:scale(0.98)}
+    .danger-btn{background:transparent;color:#ef4444;font-size:14px;padding:10px 20px;
+                border:1px solid #ef444433;border-radius:12px;cursor:pointer;transition:all 0.2s}
+    .danger-btn:hover{background:#ef44441a;border-color:#ef4444}
+
+    .error-box{background:#7f1d1d33;border:1px solid #ef444444;border-radius:12px;padding:11px 14px;
+               font-size:13px;color:#fca5a5;margin-bottom:20px}
+
+    /* Link list */
+    .link-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .link-row:last-of-type{border-bottom:none}
+    .link-icon-wrap{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,0.07)}
+    .platform-tag{font-weight:600;font-size:14px}
+    .link-url{font-size:12px;color:rgba(255,255,255,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+    .del-btn{background:rgba(239,68,68,0.12);border:none;color:#ef4444;border-radius:8px;width:28px;height:28px;
+             display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background 0.2s}
+    .del-btn:hover{background:rgba(239,68,68,0.25)}
+
+    /* Color preview */
+    .color-row{display:flex;align-items:center;gap:12px}
+    .color-preview{width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;flex-shrink:0}
+    #accent_color_text{flex:1}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both}
+    .fu-1{animation-delay:.05s}.fu-2{animation-delay:.1s}.fu-3{animation-delay:.15s}.fu-4{animation-delay:.2s}.fu-5{animation-delay:.25s}
+
+    /* Sortable drag handle */
+    .drag-handle{cursor:grab;color:rgba(255,255,255,0.2);flex-shrink:0}
+    .drag-handle:active{cursor:grabbing}
+
+    /* Toggle */
+    .toggle-wrap{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.4)}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="{% if mode == 'edit' %}/admin/{{ biz.slug }}{% else %}/dashboard{% endif %}" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      {% if mode == 'edit' %}Back to dashboard{% else %}My businesses{% endif %}
+    </a>
+    <span style="color:rgba(255,255,255,0.12)">|</span>
+    <div class="glint">Glint<span>.</span></div>
+  </div>
+
+  <div class="page">
+
+    <div class="fu fu-1" style="margin-bottom:28px">
+      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-0.02em;margin-bottom:6px">
+        {% if mode == 'edit' %}Settings{% else %}New business{% endif %}
+      </h1>
+      <p style="font-size:14px;color:rgba(255,255,255,0.4)">
+        {% if mode == 'edit' %}Update your review hub settings.{% else %}Set up your review hub in under 2 minutes.{% endif %}
+      </p>
+    </div>
+
+    {% if error %}
+      <div class="error-box fu fu-1">{{ error }}</div>
+    {% endif %}
+
+    <!-- MAIN SETTINGS FORM -->
+    <form method="POST" action="{% if mode == 'edit' %}/settings/{{ biz.slug }}{% else %}/new{% endif %}" enctype="multipart/form-data">
+
+      <!-- Business info -->
+      <div class="section fu fu-2">
+        <div class="section-title">Business info</div>
+
+        <div class="row">
+          <div class="field">
+            <label>Business name *</label>
+            <input type="text" name="name" value="{{ biz.name if biz else '' }}" placeholder="Café De Hoek" required>
+          </div>
+          <div class="field">
+            <label>URL slug *</label>
+            <input type="text" name="{% if mode == 'edit' %}new_slug{% else %}slug{% endif %}"
+                   value="{{ biz.slug if biz else '' }}" placeholder="cafe-de-hoek" required
+                   oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')">
+            <p class="hint">glint.app/s/<strong id="slug-preview">{{ biz.slug if biz else 'your-slug' }}</strong></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tagline <span style="color:rgba(255,255,255,0.25)">(shown on landing page)</span></label>
+          <input type="text" name="tagline" value="{{ biz.tagline if biz and biz.tagline else '' }}"
+                 placeholder="Happy with us? Let us know. ✨">
+        </div>
+
+        <div class="field">
+          <label>Thank-you message <span style="color:rgba(255,255,255,0.25)">(shown after a review button is tapped)</span></label>
+          <textarea name="thankyou_message" placeholder="Thank you so much! Your review means the world to us. 🙏">{{ biz.thankyou_message if biz and biz.thankyou_message else '' }}</textarea>
+        </div>
+      </div>
+
+      <!-- Branding -->
+      <div class="section fu fu-3">
+        <div class="section-title">Branding</div>
+
+        <div class="field">
+          <label>Logo <span style="color:rgba(255,255,255,0.25)">(optional — JPEG, PNG or WebP, max 5 MB)</span></label>
+
+          <!-- Current logo preview (edit mode) -->
+          {% if biz and biz.logo_url %}
+          <div id="current-logo-wrap" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;
+               background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px">
+            <img src="{{ biz.logo_url }}" id="logo-current-img"
+                 style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0">
+            <div style="flex:1;min-width:0">
+              <p style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:500">Current logo</p>
+              <p style="font-size:11px;color:rgba(255,255,255,0.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ biz.logo_url }}</p>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;margin-bottom:0">
+              <input type="checkbox" name="remove_logo" value="1" id="remove-logo-cb"
+                     onchange="document.getElementById('current-logo-wrap').style.opacity=this.checked?'0.4':'1'"
+                     style="width:14px;height:14px;accent-color:#ef4444">
+              <span style="font-size:12px;color:#ef4444;font-weight:500">Remove</span>
+            </label>
+          </div>
+          {% endif %}
+
+          <!-- Drop zone -->
+          <div id="drop-zone"
+               onclick="document.getElementById('logo_file').click()"
+               ondragover="event.preventDefault();this.style.borderColor='var(--accent,#6366f1)'"
+               ondragleave="this.style.borderColor='rgba(255,255,255,0.09)'"
+               ondrop="handleDrop(event)"
+               style="border:2px dashed rgba(255,255,255,0.09);border-radius:14px;padding:24px 20px;
+                      text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s"
+               onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+               onmouseout="this.style.background='transparent'">
+            <div id="drop-idle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px">
+                <rect x="3" y="3" width="18" height="18" rx="4"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <p style="font-size:14px;color:rgba(255,255,255,0.35)">
+                <span style="color:var(--accent,#6366f1);font-weight:600">Click to upload</span> or drag & drop
+              </p>
+              <p style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:4px">PNG, JPEG, WebP up to 5 MB</p>
+            </div>
+            <div id="drop-preview" style="display:none">
+              <img id="drop-img" style="width:72px;height:72px;border-radius:14px;object-fit:cover;margin:0 auto 8px;border:2px solid var(--accent,#6366f1)">
+              <p id="drop-name" style="font-size:13px;color:rgba(255,255,255,0.6)"></p>
+              <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px">Click to choose a different file</p>
+            </div>
+          </div>
+          <input type="file" name="logo_file" id="logo_file" accept="image/jpeg,image/png,image/webp,image/gif"
+                 style="display:none" onchange="previewFile(this)">
+        </div>
+
+        <div class="field">
+          <label>Accent color</label>
+          <div class="color-row">
+            <input type="color" id="accent_color_picker" value="{{ biz.accent_color if biz else '#6366f1' }}"
+                   class="color-preview" oninput="syncColor(this.value,'picker')">
+            <input type="text" id="accent_color_text" name="accent_color"
+                   value="{{ biz.accent_color if biz else '#6366f1' }}" placeholder="#6366f1"
+                   oninput="syncColor(this.value,'text')">
+          </div>
+          <p class="hint">Used for buttons, the logo circle, and highlight colors on the landing page.</p>
+        </div>
+      </div>
+
+
+      <div class="fu fu-5" style="display:flex;gap:12px;align-items:center">
+        <button type="submit" class="submit-btn">
+          {% if mode == 'edit' %}Save changes{% else %}Create business →{% endif %}
+        </button>
+        <a href="{% if mode == 'edit' %}/admin/{{ biz.slug }}{% else %}/dashboard{% endif %}"
+           style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:none">Cancel</a>
+      </div>
+    </form>
+
+    <!-- REVIEW LINKS — separate section only in edit mode -->
+    {% if mode == 'edit' %}
+    <div class="section fu" style="animation-delay:0.3s;margin-top:16px">
+      <div class="section-title">Review links</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:18px">
+        Toggle, delete, or add platforms. Changes are live immediately.
+      </p>
+
+      <!-- Existing links -->
+      {% for link in links %}
+      <div class="link-row" id="link-{{ link.id }}">
+        <div class="link-icon-wrap">
+          {% if link.icon == 'google' %}
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          {% elif link.icon == 'trustpilot' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#00b67a"><path d="M12 2l2.582 7.953H22l-6.71 4.876 2.583 7.953L12 18.008l-5.873 4.774 2.583-7.953L2 9.953h7.418z"/></svg>
+          {% elif link.icon == 'tripadvisor' %}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="13" r="3" stroke="#34e0a1" stroke-width="2"/><circle cx="17" cy="13" r="3" stroke="#34e0a1" stroke-width="2"/><circle cx="7" cy="13" r="1" fill="#34e0a1"/><circle cx="17" cy="13" r="1" fill="#34e0a1"/><path d="M2.5 10C4.5 7 7.5 5.5 12 5.5S19.5 7 21.5 10" stroke="#34e0a1" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+          {% else %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          {% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <p class="platform-tag">{{ link.platform_name }} {% if not link.is_active %}<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,0.3)">(hidden)</span>{% endif %}</p>
+          <p class="link-url">{{ link.url }}</p>
+        </div>
+        <form method="POST" action="/settings/{{ biz.slug }}/links/{{ link.id }}/toggle" style="margin:0">
+          <button type="submit" title="{% if link.is_active %}Hide{% else %}Show{% endif %}"
+                  style="background:{% if link.is_active %}rgba(99,102,241,0.15){% else %}rgba(255,255,255,0.05){% endif %};
+                         border:none;border-radius:8px;width:28px;height:28px;
+                         display:flex;align-items:center;justify-content:center;cursor:pointer;color:{% if link.is_active %}#6366f1{% else %}rgba(255,255,255,0.3){% endif %}">
+            {% if link.is_active %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            {% else %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            {% endif %}
+          </button>
+        </form>
+        <form method="POST" action="/settings/{{ biz.slug }}/links/{{ link.id }}/delete"
+              onsubmit="return confirm('Remove {{ link.platform_name }}?')" style="margin:0">
+          <button type="submit" class="del-btn" title="Delete">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+
+      <!-- Add link form -->
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07)">
+        <p style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:14px">Add a platform</p>
+        <form method="POST" action="/settings/{{ biz.slug }}/links/add">
+          <div class="row" style="margin-bottom:12px">
+            <div class="field" style="margin-bottom:0">
+              <label>Platform</label>
+              <select name="platform_name" onchange="autoIcon(this)"
+                      style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+                             border-radius:12px;color:#fff;padding:11px 14px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none">
+                <option value="Google">Google</option>
+                <option value="Trustpilot">Trustpilot</option>
+                <option value="Tripadvisor">Tripadvisor</option>
+                <option value="Yelp">Yelp</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Review URL</label>
+              <input type="url" name="url" placeholder="https://..." required>
+            </div>
+          </div>
+          <input type="hidden" name="icon" id="icon-field" value="google">
+          <button type="submit"
+                  style="background:rgba(99,102,241,0.15);color:#6366f1;border:1px solid rgba(99,102,241,0.3);
+                         border-radius:12px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s"
+                  onmouseover="this.style.background='rgba(99,102,241,0.25)'"
+                  onmouseout="this.style.background='rgba(99,102,241,0.15)'">
+            + Add link
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <!-- In CREATE mode: simple link fields -->
+    <div class="section fu" style="animation-delay:0.3s">
+      <div class="section-title">Review links</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px">
+        Add the platforms where you want to collect reviews. You can always add more later.
+      </p>
+      <form id="links-form-create">
+        <div class="field">
+          <label>Google</label>
+          <input type="url" name="google_url" placeholder="https://g.page/r/...">
+        </div>
+        <div class="field">
+          <label>Trustpilot</label>
+          <input type="url" name="trustpilot_url" placeholder="https://trustpilot.com/review/...">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Tripadvisor</label>
+          <input type="url" name="tripadvisor_url" placeholder="https://tripadvisor.com/...">
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <script>
+    // Sync color picker ↔ text input
+    function syncColor(val, from) {
+      if (from === 'picker') document.getElementById('accent_color_text').value = val;
+      if (from === 'text')   document.getElementById('accent_color_picker').value = val;
+      document.documentElement.style.setProperty('--accent', val);
+    }
+    document.documentElement.style.setProperty('--accent', '{{ biz.accent_color if biz else "#6366f1" }}');
+
+    // Live slug preview
+    const slugField = document.querySelector('[name={% if mode == "edit" %}new_slug{% else %}slug{% endif %}]');
+    const slugPreview = document.getElementById('slug-preview');
+    if (slugField && slugPreview) {
+      slugField.addEventListener('input', () => slugPreview.textContent = slugField.value || 'your-slug');
+    }
+
+    // Logo file drop zone
+    function previewFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      showLogoPreview(file);
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').style.borderColor = 'rgba(255,255,255,0.09)';
+      const file = e.dataTransfer.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('logo_file').files = dt.files;
+      showLogoPreview(file);
+    }
+
+    function showLogoPreview(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('drop-idle').style.display = 'none';
+        document.getElementById('drop-preview').style.display = 'block';
+        document.getElementById('drop-img').src = e.target.result;
+        document.getElementById('drop-name').textContent = file.name;
+        document.getElementById('drop-zone').style.borderColor = 'var(--accent, #6366f1)';
+        // Uncheck remove-logo if user picks a new file
+        const cb = document.getElementById('remove-logo-cb');
+        if (cb) { cb.checked = false; const wrap = document.getElementById('current-logo-wrap'); if(wrap) wrap.style.opacity='1'; }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Auto icon from platform select
+    function autoIcon(sel) {
+      const map = {Google:'google',Trustpilot:'trustpilot',Tripadvisor:'tripadvisor',Yelp:'default',Facebook:'default',Custom:'default'};
+      document.getElementById('icon-field').value = map[sel.value] || 'default';
+    }
+
+    // In create mode, the link fields are inside a separate div — move them into the main form on submit
+    {% if mode == 'create' %}
+    document.querySelector('form[action="/new"]').addEventListener('submit', function() {
+      const lf = document.getElementById('links-form-create');
+      if (!lf) return;
+      lf.querySelectorAll('input[type=url]').forEach(inp => {
+        const h = document.createElement('input');
+        h.type = 'hidden'; h.name = inp.name; h.value = inp.value;
+        this.appendChild(h);
+      });
+    });
+    {% endif %}
+  </script>
+</body>
+</html>

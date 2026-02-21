@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Cardifol — {% if card %}Edit {{ card.full_name }}{% else %}New Card{% endif %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--a:{{ card.accent_color or biz.accent_color if card else biz.accent_color }}}
+    *{-webkit-font-smoothing:antialiased;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#0d0d0d;color:#e8e8ec;min-height:100vh}
+    .wm{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.02em}.wm span{color:var(--a)}
+    .page{max-width:700px;margin:0 auto;padding:36px 20px 80px}
+    .sec{background:#18181b;border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:24px;margin-bottom:14px}
+    .sl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:600;margin-bottom:16px}
+    label{display:block;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:6px;font-weight:500}
+    input[type=text],input[type=tel],input[type=email],input[type=url],textarea,select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;color:#fff;padding:11px 14px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--a);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 20%,transparent)}
+    textarea{resize:vertical;min-height:80px}
+    select option{background:#1c1c1f}
+    .field{margin-bottom:16px}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:520px){.row2{grid-template-columns:1fr}}
+    .hint{font-size:12px;color:rgba(255,255,255,.25);margin-top:5px}
+    .sbtn{background:var(--a);color:#fff;font-weight:600;font-size:15px;padding:12px 28px;border:none;border-radius:13px;cursor:pointer;transition:filter .2s,transform .15s}
+    .sbtn:hover{filter:brightness(1.12)}.sbtn:active{transform:scale(.97)}
+    .dbtn{background:transparent;color:#ef4444;font-size:13px;padding:10px 18px;border:1px solid rgba(239,68,68,.3);border-radius:11px;cursor:pointer;transition:all .2s}
+    .dbtn:hover{background:rgba(239,68,68,.12);border-color:#ef4444}
+    .err{background:rgba(127,29,29,.3);border:1px solid rgba(239,68,68,.4);border-radius:12px;padding:11px 14px;font-size:13px;color:#fca5a5;margin-bottom:16px}
+    /* drop zone */
+    .dz{border:2px dashed rgba(255,255,255,.09);border-radius:14px;padding:22px 18px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+    .dz:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.2)}
+    /* stats bar (edit mode) */
+    .srow{display:flex;gap:20px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .srow:last-of-type{border-bottom:none}
+    .snum{font-family:'DM Serif Display',serif;font-size:26px;color:var(--a);min-width:48px}
+    /* card link row */
+    .clrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .clrow:last-of-type{border-bottom:none}
+    /* QR */
+    .qrw{background:#f9fafb;border-radius:12px;padding:12px;display:inline-block}
+    .qrw img{width:110px;height:110px;display:block}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fadeUp .38s cubic-bezier(.22,1,.36,1) both}
+    .fu1{animation-delay:.04s}.fu2{animation-delay:.09s}.fu3{animation-delay:.14s}.fu4{animation-delay:.19s}.fu5{animation-delay:.24s}
+    /* color row */
+    .cr{display:flex;align-items:center;gap:10px}
+    .cp{width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.1);cursor:pointer;flex-shrink:0}
+    /* toggle */
+    .tog-label{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+    .tog-label input{display:none}
+    .tog-track{width:44px;height:24px;border-radius:99px;background:rgba(255,255,255,.1);position:relative;transition:background .2s;flex-shrink:0}
+    .tog-label input:checked ~ .tog-track{background:var(--a)}
+    .tog-dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:99px;background:#fff;transition:left .2s}
+    .tog-label input:checked ~ .tog-track .tog-dot{left:23px}
+    /* delete modal */
+    .mb{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .mb.open{opacity:1;pointer-events:all}
+    .mbx{background:#1c1c1f;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:360px;width:90%;text-align:center;transform:scale(.95);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+    .mb.open .mbx{transform:scale(1)}
+  </style>
+</head>
+<body>
+
+<div style="background:#18181b;border-bottom:1px solid rgba(255,255,255,.06);padding:0 20px;height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50">
+  <a href="/admin/{{ biz.slug }}/cards" style="font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;display:flex;align-items:center;gap:6px">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Cards
+  </a>
+  <span style="color:rgba(255,255,255,.12)">|</span>
+  <div class="wm">Cardifol<span>.</span></div>
+</div>
+
+<div class="page">
+
+  <div class="fu fu1" style="margin-bottom:26px">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-.02em;margin-bottom:5px">
+      {% if card %}{{ card.full_name }}{% else %}New card{% endif %}
+    </h1>
+    <p style="font-size:14px;color:rgba(255,255,255,.4)">
+      {% if card %}Edit card details and track engagement.{% else %}Fill in the details for this team member's card.{% endif %}
+    </p>
+  </div>
+
+  {% if error %}<div class="err fu fu1">{{ error }}</div>{% endif %}
+
+  <!-- Stats (edit mode only) -->
+  {% if card %}
+  <div class="sec fu fu2" style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(99,102,241,.05))">
+    <p class="sl">Engagement stats</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0">
+      <div class="srow"><div><p class="snum">{{ card.views }}</p><p style="font-size:12px;color:rgba(255,255,255,.4)">Page views</p></div></div>
+      <div class="srow"><div><p class="snum">{{ card.vcard_downloads }}</p><p style="font-size:12px;color:rgba(255,255,255,.4)">vCard downloads</p></div></div>
+      <div class="srow"><div><p class="snum">{{ card.clicks_phone }}</p><p style="font-size:12px;color:rgba(255,255,255,.4)">Phone taps</p></div></div>
+      <div class="srow"><div><p class="snum">{{ card.clicks_email }}</p><p style="font-size:12px;color:rgba(255,255,255,.4)">Email taps</p></div></div>
+      <div class="srow"><div><p class="snum">{{ card.clicks_whatsapp }}</p><p style="font-size:12px;color:rgba(255,255,255,.4)">WhatsApp taps</p></div></div>
+    </div>
+    {% if card_qr is defined %}
+    <div style="margin-top:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)">
+      <div class="qrw"><img src="data:image/svg+xml;base64,{{ card_qr }}" alt="Card QR"></div>
+      <div>
+        <p style="font-size:13px;font-weight:500;margin-bottom:6px">Card QR code</p>
+        <p style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:10px;font-family:monospace;word-break:break-all">{{ base_url }}c/{{ biz.slug }}/{{ card.slug }}</p>
+        <button class="sbtn" style="font-size:13px;padding:9px 18px" onclick="navigator.clipboard.writeText('{{ base_url }}c/{{ biz.slug }}/{{ card.slug }}').then(()=>{this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy link',2000)})">Copy link</button>
+        <a href="/c/{{ biz.slug }}/{{ card.slug }}" target="_blank" style="margin-left:8px;font-size:13px;color:var(--a);text-decoration:none;font-weight:600">Preview ↗</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Main form -->
+  <form method="POST" action="{% if card %}/admin/{{ biz.slug }}/cards/{{ card.id }}/edit{% else %}/admin/{{ biz.slug }}/cards/new{% endif %}" enctype="multipart/form-data">
+
+    <div class="sec fu fu3">
+      <p class="sl">Identity</p>
+      <div class="row2">
+        <div class="field">
+          <label>Full name *</label>
+          <input type="text" name="full_name" value="{{ card.full_name if card else '' }}" placeholder="Emma de Vries" required>
+        </div>
+        <div class="field">
+          <label>URL slug *</label>
+          <input type="text" name="card_slug" value="{{ card.slug if card else '' }}" placeholder="emma-de-vries" required oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')">
+          <p class="hint">/c/{{ biz.slug }}/<strong id="slug-preview">{{ card.slug if card else 'slug' }}</strong></p>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Job title</label>
+          <input type="text" name="title" value="{{ card.title if card and card.title else '' }}" placeholder="Account Manager">
+        </div>
+        <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <label class="tog-label" style="margin-bottom:0">
+            <input type="checkbox" name="vcard_enabled" value="1" {% if not card or card.vcard_enabled %}checked{% endif %}>
+            <div class="tog-track"><div class="tog-dot"></div></div>
+            <span style="font-size:14px;color:rgba(255,255,255,.7)">Enable vCard download</span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Short bio</label>
+        <textarea name="bio" placeholder="A short sentence about this person...">{{ card.bio if card and card.bio else '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="sec fu fu4">
+      <p class="sl">Contact details</p>
+      <div class="row2">
+        <div class="field">
+          <label>Phone / mobile</label>
+          <input type="tel" name="phone" value="{{ card.phone if card and card.phone else '' }}" placeholder="+31 6 12345678">
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" name="email" value="{{ card.email if card and card.email else '' }}" placeholder="emma@bedrijf.nl">
+        </div>
+      </div>
+    </div>
+
+    <div class="sec fu fu4">
+      <p class="sl">Photo & branding</p>
+
+      <!-- Photo -->
+      {% if card and card.photo_path %}
+      <div id="cur-photo" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px">
+        <img src="{{ card.photo_path }}" style="width:52px;height:52px;border-radius:99px;object-fit:cover;flex-shrink:0">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,.7)">Current photo</p>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:0">
+          <input type="checkbox" name="remove_photo" value="1" id="rm-photo" onchange="document.getElementById('cur-photo').style.opacity=this.checked?'.4':'1'" style="accent-color:#ef4444">
+          <span style="font-size:12px;color:#ef4444;font-weight:500">Remove</span>
+        </label>
+      </div>
+      {% endif %}
+
+      <div class="dz" id="dz" onclick="document.getElementById('photo_file').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--a)'"
+           ondragleave="this.style.borderColor='rgba(255,255,255,.09)'"
+           ondrop="handleDrop(event)">
+        <div id="dz-idle">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          <p style="font-size:14px;color:rgba(255,255,255,.35)"><span style="color:var(--a);font-weight:600">Click to upload</span> or drag photo</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.2);margin-top:3px">PNG, JPEG, WebP · max 5 MB</p>
+        </div>
+        <div id="dz-prev" style="display:none">
+          <img id="dz-img" style="width:64px;height:64px;border-radius:99px;object-fit:cover;margin:0 auto 8px;border:3px solid var(--a)">
+          <p id="dz-name" style="font-size:13px;color:rgba(255,255,255,.6)"></p>
+          <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:3px">Click to choose a different photo</p>
+        </div>
+      </div>
+      <input type="file" name="photo_file" id="photo_file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="previewPhoto(this)">
+
+      <!-- Accent color -->
+      <div class="field" style="margin-top:18px">
+        <label>Accent color <span style="color:rgba(255,255,255,.2)">(leave empty to inherit from business)</span></label>
+        <div class="cr">
+          <input type="color" id="cp" value="{{ card.accent_color or biz.accent_color }}" class="cp" oninput="syncCol(this.value,'p')">
+          <input type="text" name="accent_color" id="ct" value="{{ card.accent_color or biz.accent_color }}" placeholder="#6366f1" oninput="syncCol(this.value,'t')" style="flex:1">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button type="submit" class="sbtn">{% if card %}Save changes{% else %}Create card →{% endif %}</button>
+      <a href="/admin/{{ biz.slug }}/cards" style="font-size:14px;color:rgba(255,255,255,.35);text-decoration:none">Cancel</a>
+      {% if card %}
+      <button type="button" onclick="document.getElementById('delm').classList.add('open')" class="dbtn" style="margin-left:auto">
+        Delete card
+      </button>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Social links (edit mode only) -->
+  {% if card %}
+  <div class="sec" style="margin-top:14px">
+    <p class="sl">Social & web links</p>
+
+    {% for cl in card_links %}
+    <div class="clrow">
+      <div style="width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px">
+        {% if cl.icon == 'linkedin' %}💼{% elif cl.icon == 'instagram' %}📸{% elif cl.icon == 'website' %}🌐{% elif cl.icon == 'twitter' %}🐦{% else %}🔗{% endif %}
+      </div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:14px;font-weight:600">{{ cl.label }}</p>
+        <p style="font-size:12px;color:rgba(255,255,255,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cl.url }}</p>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,.35);background:rgba(255,255,255,.05);border-radius:6px;padding:2px 8px;flex-shrink:0">{{ cl.clicks }} clicks</span>
+      <form method="POST" action="/admin/{{ biz.slug }}/cards/{{ card.id }}/links/{{ cl.id }}/delete" style="margin:0">
+        <button type="submit" style="background:rgba(239,68,68,.12);border:none;color:#ef4444;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+
+    {% if not card_links %}<p style="font-size:13px;color:rgba(255,255,255,.3);margin-bottom:16px">No links yet. Add LinkedIn, website, or other URLs.</p>{% endif %}
+
+    <form method="POST" action="/admin/{{ biz.slug }}/cards/{{ card.id }}/links/add" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="row2" style="margin-bottom:10px">
+        <div class="field" style="margin-bottom:0">
+          <label>Platform</label>
+          <select name="icon" onchange="document.querySelector('[name=label]').value=this.options[this.selectedIndex].text">
+            <option value="linkedin">LinkedIn</option>
+            <option value="website">Website</option>
+            <option value="instagram">Instagram</option>
+            <option value="twitter">X / Twitter</option>
+            <option value="link">Other</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Label</label>
+          <input type="text" name="label" value="LinkedIn" placeholder="LinkedIn">
+        </div>
+      </div>
+      <div class="field">
+        <label>URL</label>
+        <input type="url" name="url" placeholder="https://linkedin.com/in/..." required>
+      </div>
+      <button type="submit" style="background:rgba(99,102,241,.15);color:#6366f1;border:1px solid rgba(99,102,241,.3);border-radius:11px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer">+ Add link</button>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+
+{% if card %}
+<div class="mb" id="delm" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mbx">
+    <div style="font-size:32px;margin-bottom:12px">🗑️</div>
+    <h3 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px">Delete {{ card.full_name }}?</h3>
+    <p style="font-size:14px;color:rgba(255,255,255,.4);line-height:1.6;margin-bottom:22px">This will permanently delete the card and all its tracking data.</p>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('delm').classList.remove('open')" style="flex:1;padding:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:rgba(255,255,255,.7);font-size:14px;font-weight:600;cursor:pointer">Cancel</button>
+      <form method="POST" action="/admin/{{ biz.slug }}/cards/{{ card.id }}/delete" style="flex:1;margin:0">
+        <button type="submit" style="width:100%;padding:11px;background:#ef4444;border:none;border-radius:11px;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  function syncCol(v,from){if(from==='p')document.getElementById('ct').value=v;if(from==='t')document.getElementById('cp').value=v;document.documentElement.style.setProperty('--a',v);}
+  const slugField=document.querySelector('[name=card_slug]'),slugPrev=document.getElementById('slug-preview');
+  if(slugField&&slugPrev)slugField.addEventListener('input',()=>slugPrev.textContent=slugField.value||'slug');
+  function previewPhoto(input){const f=input.files[0];if(!f)return;showPrev(f);}
+  function handleDrop(e){e.preventDefault();document.getElementById('dz').style.borderColor='rgba(255,255,255,.09)';const f=e.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;const dt=new DataTransfer();dt.items.add(f);document.getElementById('photo_file').files=dt.files;showPrev(f);}
+  function showPrev(f){const r=new FileReader();r.onload=e=>{document.getElementById('dz-idle').style.display='none';document.getElementById('dz-prev').style.display='block';document.getElementById('dz-img').src=e.target.result;document.getElementById('dz-name').textContent=f.name;document.getElementById('dz').style.borderColor='var(--a)';const cb=document.getElementById('rm-photo');if(cb){cb.checked=false;document.getElementById('cur-photo').style.opacity='1';}};r.readAsDataURL(f);}
+  // Auto-fill label from platform select
+  document.querySelectorAll('select[name=icon]').forEach(s=>s.addEventListener('change',function(){const m={linkedin:'LinkedIn',website:'Website',instagram:'Instagram',twitter:'X / Twitter',link:'Link'};const l=this.closest('form').querySelector('[name=label]');if(l)l.value=m[this.value]||'';}));
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Glint — {% if mode == 'login' %}Sign in{% else %}Create account{% endif %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{-webkit-font-smoothing:antialiased;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#0d0d0d;color:#e8e8ec;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+    .o1{width:400px;height:400px;background:#6366f133;top:-120px;left:-120px;animation:drift 14s ease-in-out infinite}
+    .o2{width:300px;height:300px;background:#ffffff08;bottom:40px;right:-80px;animation:drift 18s ease-in-out infinite reverse}
+    @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,30px)}}
+    .card{position:relative;z-index:1;background:#18181b;border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:40px 36px;width:100%;max-width:400px}
+    .glint{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-0.02em}
+    .glint span{color:#6366f1}
+    label{display:block;font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:6px;font-weight:500}
+    input[type=email],input[type=password]{
+      width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);
+      border-radius:12px;color:#fff;padding:12px 14px;font-size:15px;font-family:'DM Sans',sans-serif;
+      outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:16px}
+    input:focus{border-color:#6366f1;box-shadow:0 0 0 3px #6366f122}
+    .btn{width:100%;padding:14px;background:#6366f1;color:#fff;font-weight:600;font-size:15px;
+         border:none;border-radius:13px;cursor:pointer;transition:filter 0.2s,transform 0.15s;margin-top:4px}
+    .btn:hover{filter:brightness(1.12)}
+    .btn:active{transform:scale(0.98)}
+    .error-box{background:#7f1d1d33;border:1px solid #ef444444;border-radius:12px;padding:11px 14px;
+               font-size:13px;color:#fca5a5;margin-bottom:16px}
+    .divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:rgba(255,255,255,0.2);font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07)}
+    .switch-link{text-align:center;font-size:14px;color:rgba(255,255,255,0.35);margin-top:20px}
+    .switch-link a{color:#6366f1;text-decoration:none;font-weight:500}
+    .switch-link a:hover{text-decoration:underline}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .card{animation:fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both}
+  </style>
+</head>
+<body>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+
+  <div class="card">
+    <div class="glint" style="margin-bottom:28px">Glint<span>.</span></div>
+
+    <h2 style="font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-0.02em;margin-bottom:6px">
+      {% if mode == 'login' %}Welcome back{% else %}Create your account{% endif %}
+    </h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:24px">
+      {% if mode == 'login' %}Sign in to your Glint dashboard.{% else %}Start collecting reviews in minutes.{% endif %}
+    </p>
+
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/{% if mode == 'login' %}login{% else %}register{% endif %}">
+      <label>Email address</label>
+      <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+
+      <label>Password</label>
+      <input type="password" name="password" placeholder="{% if mode == 'register' %}At least 8 characters{% else %}Your password{% endif %}" required autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}">
+
+      <button type="submit" class="btn">
+        {% if mode == 'login' %}Sign in →{% else %}Create account →{% endif %}
+      </button>
+    </form>
+
+    <div class="switch-link">
+      {% if mode == 'login' %}
+        Don't have an account? <a href="/register">Sign up free</a>
+      {% else %}
+        Already have an account? <a href="/login">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cardifol — Cards · {{ biz.name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --a: {
+          {
+          biz.accent_color
+        }
+      }
+    }
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0d0d0d;
+      color: #e8e8ec;
+      min-height: 100vh
+    }
+
+    .wm {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      letter-spacing: -.02em
+    }
+
+    .wm span {
+      color: var(--a)
+    }
+
+    .sbl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      color: rgba(255, 255, 255, .5);
+      transition: all .18s
+    }
+
+    .sbl:hover,
+    .sbl.on {
+      background: rgba(255, 255, 255, .07);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .ccard {
+      background: #18181b;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 18px;
+      padding: 18px;
+      transition: border-color .2s, transform .2s;
+      text-decoration: none;
+      color: inherit;
+      display: block
+    }
+
+    .ccard:hover {
+      border-color: rgba(255, 255, 255, .2);
+      transform: translateY(-2px)
+    }
+
+    .av {
+      width: 52px;
+      height: 52px;
+      border-radius: 99px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, .1)
+    }
+
+    .avi {
+      width: 52px;
+      height: 52px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 22px;
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, .1)
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center
+    }
+
+    .stat-n {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--a)
+    }
+
+    .stat-l {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .3);
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .new-card {
+      background: transparent;
+      border: 1.5px dashed rgba(255, 255, 255, .1);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, .35);
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+      font-weight: 500;
+      min-height: 110px
+    }
+
+    .new-card:hover {
+      border-color: var(--a);
+      color: rgba(255, 255, 255, .7)
+    }
+
+    .pill {
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .fu {
+      animation: fadeUp .38s cubic-bezier(.22, 1, .36, 1) both
+    }
+  </style>
+</head>
+
+<body>
+  <div class="flex min-h-screen">
+    <aside class="hidden lg:flex"
+      style="width:220px;min-height:100vh;background:#18181b;border-right:1px solid rgba(255,255,255,.06);padding:20px 12px;flex-direction:column;flex-shrink:0">
+      <div class="wm px-2 mb-8">Cardifol<span>.</span></div>
+      <a href="/dashboard" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>All businesses</a>
+      <a href="/admin/{{ biz.slug }}" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>Dashboard</a>
+      <a href="/admin/{{ biz.slug }}/cards" class="sbl on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <line x1="2" y1="10" x2="22" y2="10" />
+        </svg>Cards</a>
+      <a href="/settings/{{ biz.slug }}" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>Settings</a>
+      <div style="margin-top:auto">
+        <a href="/logout" class="sbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>Sign out</a>
+      </div>
+    </aside>
+
+    <main style="flex:1;overflow-x:hidden">
+      <div style="max-width:820px;margin:0 auto;padding:32px 20px 80px">
+        <div class="fu"
+          style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;animation-delay:0.04s">
+          <div>
+            <a href="/admin/{{ biz.slug }}"
+              style="font-size:12px;color:rgba(255,255,255,.35);text-decoration:none;display:flex;align-items:center;gap:5px;margin-bottom:6px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round">
+                <path d="M19 12H5M12 5l-7 7 7 7" />
+              </svg>{{ biz.name }}
+            </a>
+            <h1 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em">Digital cards</h1>
+            <p style="font-size:14px;color:rgba(255,255,255,.35);margin-top:4px">{{ cards|length }} card{{ 's' if
+              cards|length!=1 }} · {{ biz.name }}</p>
+          </div>
+          <a href="/admin/{{ biz.slug }}/cards/new"
+            style="display:inline-flex;align-items:center;gap:8px;background:var(--a);color:#fff;font-weight:600;padding:12px 22px;border-radius:13px;text-decoration:none;font-size:15px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>New card
+          </a>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+          {% for card in cards %}
+          <a href="/admin/{{ biz.slug }}/cards/{{ card.id }}/edit" class="ccard fu"
+            style="animation-delay:{{ 0.08 + loop.index0 * 0.04 }}s">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+              {% if card.photo_path %}<img src="{{ card.photo_path }}" class="av" alt="">
+              {% else %}<div class="avi" style="background:{{ card.accent_color or biz.accent_color }}">{{
+                card.full_name[0]|upper }}</div>{% endif %}
+              <div style="min-width:0">
+                <p style="font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{
+                  card.full_name }}</p>
+                <p style="font-size:12px;color:rgba(255,255,255,.4)">{{ card.title or '—' }}</p>
+                <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:2px">/c/{{ biz.slug }}/{{ card.slug }}
+                </p>
+              </div>
+            </div>
+            <div
+              style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+              <div class="stat"><span class="stat-n">{{ card.views }}</span><span class="stat-l">Views</span></div>
+              <div class="stat"><span class="stat-n">{{ card.vcard_downloads }}</span><span class="stat-l">vCards</span>
+              </div>
+              <div class="stat"><span class="stat-n">{{ card.clicks_phone + card.clicks_email + card.clicks_whatsapp
+                  }}</span><span class="stat-l">Contacts</span></div>
+              <div class="stat">
+                {% if card.vcard_enabled %}
+                <span class="pill" style="background:rgba(52,211,153,.15);color:#34d399">Active</span>
+                {% else %}
+                <span class="pill" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.3)">Off</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+
+          <a href="/admin/{{ biz.slug }}/cards/new" class="new-card fu"
+            style="animation-delay:{{ 0.08 + cards|length * 0.04 }}s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>New card
+          </a>
+        </div>
+
+        {% if not cards %}
+        <div style="text-align:center;padding:80px 20px">
+          <p style="font-size:48px;margin-bottom:16px">🪪</p>
+          <h2 style="font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:8px">No cards yet</h2>
+          <p style="color:rgba(255,255,255,.4);font-size:15px;margin-bottom:24px">Create a digital business card for
+            each team member.</p>
+          <a href="/admin/{{ biz.slug }}/cards/new"
+            style="display:inline-block;background:var(--a);color:#fff;font-weight:600;padding:13px 28px;border-radius:13px;text-decoration:none;font-size:15px">Create
+            first card →</a>
+        </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</body>
+
+</html>
